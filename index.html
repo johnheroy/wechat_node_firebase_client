@@ -1,0 +1,53 @@
+<html>
+  <head>
+    <title>WeChat / Node.js / Firebase demo</title>
+    <script src='https://cdn.firebase.com/v0/firebase.js'></script>
+    <script src='http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.9.0.min.js'></script>
+  </head>
+  <body>
+
+    <h1>WeChat / Node.js / Firebase demo</h1>
+    <img src="img/qr-code.jpeg" alt="QR Code" height="200" width="200"><br><br>
+    <input type='text' id='nameInput' placeholder='Name'>
+    <input type='text' id='messageInput' placeholder='Message'>
+    <h2>Messages</h2>
+    <ul id="messages"></ul>
+
+    <script type="text/javascript">
+      // declarations
+      var firebase_url = 'https://wechat-node-demo.firebaseIO.com/';
+      var fireRoute = new Firebase(firebase_url);
+      var messages = fireRoute.child('messages');
+      var users = fireRoute.child('users');
+
+      // Text input
+      $('#messageInput').keypress(function (e) {
+        if (e.keyCode == 13) {
+          var name = $('#nameInput').val();
+          var text = $('#messageInput').val();
+          messages.push({ name: name, text: text, type: "text" });
+          $('#messageInput').val('');
+        }
+      });
+
+      $('#nameInput').keyup(function(e) {
+        nameRef.update({ first : $('#nameInput').val() });
+      });
+
+      users.on('child_added', function(snapshot) {
+        var user = snapshot.val();
+        $("#users").append($('<li/>').text(user.name));
+      });
+
+      messages.on('child_added', function(snapshot) {
+        var message = snapshot.val();
+        displayTextMessage(message.name, message.text);
+      });
+
+      function displayTextMessage(name, text) {
+        $('<li/>').text(text).prepend($('<em/>').text(name+": ")).appendTo($('#messages'));
+        $('#messages')[0].scrollTop = $('#messages')[0].scrollHeight;
+      };
+    </script>
+  </body>
+</html>
